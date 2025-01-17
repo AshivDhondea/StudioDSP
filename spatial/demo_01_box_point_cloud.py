@@ -1,3 +1,4 @@
+import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import open3d as o3d
@@ -10,19 +11,33 @@ plt.rc('font',family='DejaVu Sans')
 
 
 if __name__ == '__main__':
-    #TODO: Add relevant comments.
-    length = 0.3 # [m]
-    width = 0.5 # [m]
-    height = 0.7 # [m]
-    resolution = 0.05 # [m]
+    # Parse input arguments.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l", "-length [m]", type=float,required=True, help="Length of cuboid in metres")
+    parser.add_argument("-w", "--width [m]", type=float, required=True, help="Width of cuboid in metres")
+    parser.add_argument("-h", "--height [m]", type=float, required=True, help="Height of cuboid in metres")
+    parser.add_argument("-r", "--resolution [m]", type=float, required=False, default=0.05, help="Spatial resolution in metres")
+    parser.add_argument("-p", "--PLY file", type=str, required=False, help="PLY file name if you want to save the point cloud.")
+
+    args = parser.parse_args()
+    length = args.l
+    width = args.w
+    height = args.h
+    resolution = args.r
+    ply_file = args.p
+
+    if ply_file:
+        if not ply_file.endswith('.ply'):
+            ftype_err = f"File type error in {ply_file}. Expected .ply"
+            raise ValueError(ftype_err)
 
     # Create arrays for each dimension with the specified dimensions sampled at the specified resolution.
     x = np.arange(start=0., stop=length, step=resolution, dtype=np.float64) # array of length d_x
-    print(f"{np.shape(x)=}")
+    print(f"d_x {np.shape(x)=}")
     y = np.arange(start=0., stop=width, step=resolution, dtype=np.float64) # array of length d_y
-    print(f"{np.shape(y)=}")
+    print(f"d_y {np.shape(y)=}")
     z = np.arange(start=0., stop=height, step=resolution, dtype=np.float64) # array of length d_z
-    print(f"{np.shape(z)=}")
+    print(f"d_z {np.shape(z)=}")
 
     #TODO: Clarify how faces are labelled.
 
@@ -102,6 +117,12 @@ if __name__ == '__main__':
         geometry_list=[face_1_pcd],
         window_name='Face 1 Point Cloud',
         point_show_normal=False,)
+
+    xz_x, xz_z = np.meshgrid(x, z)
+    xy_z_1 = np.zeros_like(xy_x)
+
+    # Explain that there are duplicate points in the point cloud which arising from the edge where
+    # two faces meet.
 
 
 
