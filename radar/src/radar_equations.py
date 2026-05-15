@@ -1,3 +1,4 @@
+import src.radar_constants as constants
 from typing import Union
 import logging
 import math
@@ -58,3 +59,15 @@ def calculate_search_volume(azimuth_angle: float, elevation_angle: float) -> flo
     eqn 1.61 in Mahafza book
     """
     return azimuth_angle * elevation_angle / (57.296 ** 2)  # steradians
+
+
+def calculate_power_aperture(snr: float, tsc: float,radar_cross_section: float, rho: float, noise_temp: float, nf: float, loss: float, az_angle: float, el_angle: float):
+    """
+    implements Listing 1.5. MATLAB Function power_aperture.
+    % This program implements Eq. (1.67)
+    """
+    omega = calculate_search_volume(az_angle,el_angle) # compute search volume in steradians
+
+    # implement Eq. (1.67)
+    power_aperture: float = snr + power_to_decibel(4. * math.pi) + power_to_decibel(constants.BOLTZMANN_CONSTANT) + power_to_decibel(noise_temp) + nf + loss + power_to_decibel(rho **4) + power_to_decibel(omega) - power_to_decibel(radar_cross_section) - power_to_decibel(tsc)
+    return power_aperture
