@@ -71,3 +71,17 @@ def calculate_power_aperture(snr: float, tsc: float,radar_cross_section: float, 
     # implement Eq. (1.67)
     power_aperture: float = snr + power_to_decibel(4. * math.pi) + power_to_decibel(constants.BOLTZMANN_CONSTANT) + power_to_decibel(noise_temp) + nf + loss + power_to_decibel(rho **4) + power_to_decibel(omega) - power_to_decibel(radar_cross_section) - power_to_decibel(tsc)
     return power_aperture
+
+
+def linear_chirp(start_frequency: float, end_frequency: float, time: float, sampling_frequency: float, amplitude: float) -> np.ndarray:
+    if time == 0. or sampling_frequency == 0.:
+        dbz = "Duration or sampling frequency cannot be zero."
+        logging.error(dbz)
+        raise ZeroDivisionError(dbz)
+    end_freq_comp = (end_frequency - start_frequency) / (2 * time)
+    dt = 1. / sampling_frequency  # set sampling interval
+    time_array = np.arange(0, time, dt, dtype=np.float64)  # 0:dt:dur; % create vector of time samples
+    psi = 2 * math.pi * (
+                100. * np.ones_like(time_array) + start_frequency * time_array + end_freq_comp * time_array * time_array)  # set argument for chirp function
+    xx = amplitude * np.cos(psi)  # modulate signal
+    return xx.astype(complex)
